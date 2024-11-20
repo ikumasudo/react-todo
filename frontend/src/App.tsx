@@ -1,22 +1,36 @@
 import { useEffect, useState } from "react"
 import pb from "./lib/pb"
 
+interface Todo {
+  id: string;
+  title: string;
+  completed: boolean;
+  description: string;
+}
+
 function App() {
-  const [msg, setMsg] = useState("")
+  const [todos, setTodos] = useState<Todo[]>([])
 
   useEffect(() => {
-    async function healthCheck() {
-      const res = await pb.health.check()
-      console.log(res)
-      setMsg(res.message)
+    async function fetchTodos() {
+      const res = await pb.collection("todo").getFullList<Todo>()
+      setTodos(res)
     }
-    healthCheck()
+    fetchTodos()
   }, [])
 
   return (
     <>
-      <h1>Hello world!</h1>
-      <p>message from pocketbase: {msg}</p>
+      <ol>
+        {todos.map(todo => (
+          <li>
+            <span>{todo.completed ? "✓" : "□"}</span>
+            <span key={todo.id}>{todo.title}</span>
+            <br />
+            <small>{todo.description}</small>
+          </li>
+        ))}
+      </ol>
     </>
   )
 }
